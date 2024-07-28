@@ -5,6 +5,8 @@ import Vision from './pages/Vision';
 import Contact from './pages/Contact';
 import Ideas from './pages/Ideas';
 import Admin from './pages/Admin';
+import ArticlesPage from './pages/ArticlesPage';
+import ArticlePage from './pages/ArticlePage';
 import ContentDetail from './pages/ContentDetail';
 import './App.css';
 
@@ -29,6 +31,8 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/content/:id" element={<ContentDetail />} />
+            <Route exact path="/articles" component={ArticlesPage} />
+            <Route path="/article/:id" component={ArticlePage} />
           </Routes>
         </main>
       </div>
