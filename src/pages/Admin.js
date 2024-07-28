@@ -36,7 +36,7 @@ const AdminPage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewItem(prev => ({ ...prev, image: reader.result }));
+        setNewItem(prev => ({ ...prev, image: reader.result, imageName: file.name }));
       };
       reader.readAsDataURL(file);
     }
@@ -44,10 +44,54 @@ const AdminPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const updatedContent = [...content, { ...newItem, id: Date.now() }];
+    const newId = Date.now().toString();
+    const updatedContent = [...content, { ...newItem, id: newId }];
     setContent(updatedContent);
     localStorage.setItem('content', JSON.stringify(updatedContent));
+    
+    // Generate file content
+    const fileContent = generateFileContent(newItem, newId);
+    
+    // Trigger file download
+    downloadFile(`article-${newId}.js`, fileContent);
+    
+    // If there's an image, trigger its download
+    if (newItem.image) {
+      downloadFile(newItem.imageName, newItem.image);
+    }
+    
     setNewItem({ type: 'article', title: '', content: '', image: '', starred: false });
+  };
+
+  const generateFileContent = (item, id) => {
+    return `import React from 'react';
+
+export const metadata = {
+  id: '${id}',
+  title: '${item.title}',
+  type: '${item.type}',
+  image: ${item.image ? `'${item.imageName}'` : 'null'},
+};
+
+export default function Article() {
+  return (
+    <div className="article-content">
+      <h1>${item.title}</h1>
+      <div dangerouslySetInnerHTML={{ __html: \`${item.content.replace(/`/g, '\\`')}\` }} />
+      ${item.image ? `<img src="/articles/img/${item.imageName}" alt="${item.title}" />` : ''}
+    </div>
+  );
+}`;
+  };
+
+  const downloadFile = (filename, content) => {
+    const element = document.createElement('a');
+    const file = new Blob([content], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = filename;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   const handleDelete = (id) => {
